@@ -60,5 +60,17 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
-export const signIn = () => signInWithPopup(auth, googleProvider);
+export const signIn = async () => {
+  try {
+    return await signInWithPopup(auth, googleProvider);
+  } catch (error: any) {
+    if (error.code === 'auth/unauthorized-domain') {
+      alert(
+        'This domain is not authorized for Firebase Authentication. ' +
+        'Please add "work-flow-ai-kappa.vercel.app" to your authorized domains in the Firebase Console.'
+      );
+    }
+    throw error;
+  }
+};
 export const signOut = () => auth.signOut();

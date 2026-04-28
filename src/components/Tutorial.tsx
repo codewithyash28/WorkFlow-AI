@@ -30,6 +30,9 @@ export default function Tutorial({ onComplete, onSkip }: TutorialProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-white/90 dark:bg-black/90 backdrop-blur-xl p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tutorial-title"
     >
       <button 
         onClick={onSkip}
@@ -50,7 +53,7 @@ export default function Tutorial({ onComplete, onSkip }: TutorialProps) {
             <span className="text-[10px] uppercase tracking-[0.2em] font-black text-neutral-400 mb-4 block">
               Step {step + 1} of {TUTORIAL_STEPS.length}
             </span>
-            <h2 className="text-4xl font-display font-medium mb-6 leading-tight">
+            <h2 id="tutorial-title" className="text-4xl font-display font-medium mb-6 leading-tight">
               {TUTORIAL_STEPS[step].title}
             </h2>
             <p className="text-lg text-neutral-500 dark:text-neutral-400 leading-relaxed mb-12">

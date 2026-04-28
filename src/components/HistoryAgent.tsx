@@ -63,13 +63,15 @@ export default function HistoryAgent({ tasks, onClose }: HistoryAgentProps) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
       className="fixed bottom-32 right-8 w-96 bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-2xl border border-neutral-100 dark:border-neutral-800 z-[50] overflow-hidden flex flex-col max-h-[60vh]"
+      role="dialog"
+      aria-labelledby="history-agent-title"
     >
       <div className="p-6 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between bg-neutral-900 dark:bg-white text-white dark:text-black">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-neutral-800 dark:bg-neutral-100 flex items-center justify-center">
             <Sparkles size={16} />
           </div>
-          <h3 className="font-bold">History Agent</h3>
+          <h3 id="history-agent-title" className="font-bold">History Agent</h3>
         </div>
         <button onClick={onClose} className="opacity-60 hover:opacity-100 transition-opacity">
           <X size={20} />

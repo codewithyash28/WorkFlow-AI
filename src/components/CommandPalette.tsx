@@ -68,7 +68,11 @@ export default function CommandPalette({ isOpen, onClose, onAction, onAddTask }:
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -20 }}
           className="relative w-full max-w-xl bg-white dark:bg-neutral-900 rounded-[2rem] shadow-2xl border border-neutral-100 dark:border-neutral-800 overflow-hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="command-palette-title"
         >
+          <h2 id="command-palette-title" className="sr-only">Command Palette</h2>
           <div className="flex items-center px-6 py-4 border-b border-neutral-100 dark:border-neutral-800">
             <Search className="text-neutral-400 mr-3" size={20} />
             <input 
