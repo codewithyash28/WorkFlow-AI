@@ -5,9 +5,13 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const apiKey = process.env.GEMINI_API_KEY;
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export async function summarizeMeeting(text: string): Promise<string> {
+  if (!ai) {
+    return "Error: Gemini API key is not configured. Please set GEMINI_API_KEY.";
+  }
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -24,6 +28,9 @@ ${text}`,
 }
 
 export async function draftEmail(brief: string, tone: 'Formal' | 'Semi-formal' | 'Friendly'): Promise<string> {
+  if (!ai) {
+    return "Error: Gemini API key is not configured. Please set GEMINI_API_KEY.";
+  }
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",

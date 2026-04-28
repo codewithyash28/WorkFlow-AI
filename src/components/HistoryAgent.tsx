@@ -28,7 +28,13 @@ export default function HistoryAgent({ tasks, onClose }: HistoryAgentProps) {
     setResponse('');
 
     try {
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        setResponse("Gemini API key is not configured. Please set GEMINI_API_KEY.");
+        setIsLoading(false);
+        return;
+      }
+      const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const context = tasks.map(t => `${t.title} (Priority: ${t.priority}, Completed: ${t.completed})`).join('\n');
