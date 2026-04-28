@@ -1,0 +1,83 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and productivity statistics",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "workType": { "type": "string" },
+        "teamId": { "type": "string" },
+        "summariesGenerated": { "type": "number" },
+        "emailsDrafted": { "type": "number" },
+        "tasksCompleted": { "type": "number" },
+        "isDarkMode": { "type": "boolean" },
+        "tutorialShown": { "type": "boolean" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A productivity task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "teamId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "priority": { "type": "string", "enum": ["High", "Medium", "Low"] },
+        "estimatedTime": { "type": "number" },
+        "completed": { "type": "boolean" },
+        "createdAt": { "type": "number" },
+        "subtasks": {
+          "type": "array",
+          "items": { "$ref": "#/entities/SubTask" }
+        }
+      },
+      "required": ["id", "title", "completed", "createdAt"]
+    },
+    "Team": {
+      "title": "Team",
+      "description": "A collaborative team",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "members": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "name", "members"]
+    },
+    "SubTask": {
+      "title": "SubTask",
+      "description": "A smaller part of a task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "completed": { "type": "boolean" }
+      },
+      "required": ["id", "title", "completed"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents"
+    },
+    "users/{userId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "User specific tasks"
+    },
+    "teams/{teamId}": {
+      "schema": "Team",
+      "description": "Team documents"
+    },
+    "teams/{teamId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Team shared tasks"
+    }
+  }
+}

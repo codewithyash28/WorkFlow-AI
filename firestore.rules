@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // USER RULES
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.keys().hasAll(['uid', 'email']) &&
+               data.uid is string && data.uid == userId &&
+               data.email is string &&
+               (data.get('name', '') is string) &&
+               (data.get('workType', '') is string) &&
+               (data.get('summariesGenerated', 0) is number) &&
+               (data.get('emailsDrafted', 0) is number) &&
+               (data.get('tasksCompleted', 0) is number);
+      }
+
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasAny(['name', 'workType', 'teamId', 'summariesGenerated', 'emailsDrafted', 'tasksCompleted', 'isDarkMode', 'tutorialShown'])
+      );
+    }
+
+    // TASK RULES
+    match /users/{userId}/tasks/{taskId} {
+      function isValidTask(data) {
+        return data.keys().hasAll(['id', 'userId', 'title', 'completed', 'createdAt']) &&
+               data.id == taskId &&
+               data.userId == userId &&
+               data.title is string && data.title.size() <= 200 &&
+               data.completed is bool &&
+               data.createdAt is int &&
+               (data.get('description', '') is string) &&
+               (data.get('priority', 'Medium') in ['High', 'Medium', 'Low']) &&
+               (data.get('estimatedTime', 30) is int) &&
+               (data.get('subtasks', []) is list);
+      }
+
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidTask(incoming()) && incoming().userId == request.auth.uid;
+      allow update: if isOwner(userId) && isValidTask(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasAny(['title', 'description', 'priority', 'completed', 'subtasks', 'estimatedTime'])
+      );
+      allow delete: if isOwner(userId);
+    }
+
+    // TEAM RULES
+    match /teams/{teamId} {
+      function isMember(members) {
+        return isSignedIn() && members.hasAny([request.auth.uid]);
+      }
+
+      allow get: if isMember(resource.data.members);
+      allow create: if isSignedIn(); // Add more strictness if needed
+      allow update: if isMember(resource.data.members) && incoming().members.hasAny([request.auth.uid]);
+    }
+
+    match /teams/{teamId}/tasks/{taskId} {
+      function isTeamMember() {
+        return get(/databases/$(database)/documents/teams/$(teamId)).data.members.hasAny([request.auth.uid]);
+      }
+
+      function isValidTeamTask(data) {
+        return data.keys().hasAll(['id', 'teamId', 'title', 'completed', 'createdAt']) &&
+               data.id == taskId &&
+               data.teamId == teamId &&
+               data.title is string && data.title.size() <= 200 &&
+               data.completed is bool &&
+               data.createdAt is int &&
+               (data.get('description', '') is string) &&
+               (data.get('priority', 'Medium') in ['High', 'Medium', 'Low']) &&
+               (data.get('estimatedTime', 30) is int) &&
+               (data.get('subtasks', []) is list);
+      }
+
+      allow list, get: if isTeamMember();
+      allow create: if isTeamMember() && isValidTeamTask(incoming());
+      allow update: if isTeamMember() && isValidTeamTask(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasAny(['title', 'description', 'priority', 'completed', 'subtasks', 'estimatedTime', 'createdAt'])
+      );
+      allow delete: if isTeamMember();
+    }
+  }
+}
